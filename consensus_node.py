@@ -180,7 +180,7 @@ def main():
         baud=args.baud,
         id_to_addr=id_to_addr,
         neighbors=my_neighbors,
-        value0=my["value"],
+        value0=2, # treba promijeniti
         sigma=args.sigma,
         num_iterations=args.iters,
         wait_timeout_s=args.timeout,
