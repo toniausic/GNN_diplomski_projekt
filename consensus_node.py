@@ -172,15 +172,15 @@ def main():
     if args.id not in nodes:
         raise SystemExit(f"Node '{args.id}' not found in config")
 
-    my_neighbors = nodes[args.id]
+    node_config = nodes[args.id]
 
     node = ConsensusNode(
         node_id=args.id,
         port=args.port,
         baud=args.baud,
         id_to_addr=id_to_addr,
-        neighbors=my_neighbors,
-        value0=2, # treba promijeniti
+        neighbors=node_config["neighbours"],
+        value0=node_config["value"], # treba promijeniti
         sigma=args.sigma,
         num_iterations=args.iters,
         wait_timeout_s=args.timeout,

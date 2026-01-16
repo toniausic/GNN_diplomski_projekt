@@ -8,11 +8,11 @@
 
   },
   "nodes": {
-    "A": ["B", "C", "D"],
-    "B": ["C"],
-    "C": ["D"],
-    "D": ["E"],
-    "E": ["A"]
+    "A": {"neighbours": ["D","B", "E"], "value":1},
+    "B": {"neighbours": ["C", "A"], "value":2},
+    "C": {"neighbours": ["D", "B"], "value":3},
+    "D": {"neighbours": ["E", "C", "A"], "value":4},
+    "E": {"neighbours": ["A", "D"], "value":5}
   }
 }
 
