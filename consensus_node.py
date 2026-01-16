@@ -172,14 +172,14 @@ def main():
     if args.id not in nodes:
         raise SystemExit(f"Node '{args.id}' not found in config")
 
-    my = nodes[args.id]
+    my_neighbors = nodes[args.id]
 
     node = ConsensusNode(
         node_id=args.id,
         port=args.port,
         baud=args.baud,
         id_to_addr=id_to_addr,
-        neighbors=my["neighbors"],
+        neighbors=my_neighbors,
         value0=my["value"],
         sigma=args.sigma,
         num_iterations=args.iters,
