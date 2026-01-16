@@ -9,9 +9,6 @@ from digi.xbee.models.address import XBee64BitAddress
 from digi.xbee.exception import TransmitException
 
 
-# PRIPAZITI NA PAYLOAD SIZE ERROR, IMAO SAM PROBLEMA KOD XBEE TESTIRANJA gnn_node.py FILEA
-
-
 def load_config(path: str) -> Dict[str, Any]:
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
@@ -140,7 +137,8 @@ class ConsensusNode:
             with self._lock:
                 got = dict(self.received_values.get(k, {}))
 
-            if len(got) == 0:
+            #TODO: Ako je broj manji od broja susjeda nista samo print, inace radi
+            if len(got) == 0: 
                 print(f"[{self.node_id}] k={k} recv=0/{len(self.neighbors)} value={self.value:.6f}")
             else:
                 suma = 0.0
