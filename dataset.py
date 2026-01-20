@@ -1,72 +1,15 @@
-import torch
-from torch.utils.data import Dataset
 import random
-import matplotlib.pyplot as plt
-from torch.utils.data import DataLoader
+import numpy as np
 
-import matplotlib.pyplot as plt
-
-def visualize_graph(sample):
-    x = sample["x"].squeeze(-1)
-    positions = sample["positions"]
-    source = sample["source"]
-    num_nodes = sample["num_nodes"]
-    A = sample["A"]
-
-    print("sorse:", source)
-
-    plt.figure()
-
-    # bridovi
-    for i in range(num_nodes):
-        for j in range(i + 1, num_nodes):
-            if A[i, j] > 0:
-                plt.plot(
-                    [positions[i, 0], positions[j, 0]],
-                    [positions[i, 1], positions[j, 1]],
-                    alpha=0.3,
-                )
-
-    # čvorovi
-    plt.scatter(
-        positions[:, 0],
-        positions[:, 1],
-        s=300 * x + 40,
-    )
-
-    # oznake čvorova ako ih je točno 5
-    if num_nodes == 5:
-        labels = ["A", "B", "C", "D", "E"]
-        for i, label in enumerate(labels):
-            plt.text(
-                positions[i, 0] + 0.02,  # mali pomak udesno
-                positions[i, 1] + 0.02,  # mali pomak gore
-                label,
-                fontsize=12,
-                fontweight="bold",
-            )
-
-    # izvor signala
-    plt.scatter(
-        source[0],
-        source[1],
-        marker="x",
-        s=300,
-    )
-
-    plt.title("Vizualizacija grafa (velicina = jacina signala)")
-    plt.xlabel("x")
-    plt.ylabel("y")
-    plt.show()
-
-class SignalGraphDataset():
+class SignalGraphDataset:
     def __init__(
         self,
         node_size=5,
         std=0.01,
         max_distance=10.0,
         connectivity_prob=0.4,
-        label_type="node"
+        label_type="node",
+        seed=None,
     ):
         self.node_size = node_size
         self.std = std
@@ -74,62 +17,67 @@ class SignalGraphDataset():
         self.connectivity_prob = connectivity_prob
         self.label_type = label_type
 
+        # optional reproducibility
+        if seed is not None:
+            random.seed(seed)
+            np.random.seed(seed)
 
     def getGraph(self):
         num_nodes = random.randint(self.node_size, self.node_size)
-        positions = torch.rand(num_nodes, 2) * self.max_distance
+        positions = np.random.rand(num_nodes, 2) * self.max_distance
 
-        A = torch.zeros(num_nodes, num_nodes)
+        # adjacency matrix (0/1)
+        A = np.zeros((num_nodes, num_nodes), dtype=np.float32)
         for i in range(num_nodes):
             for j in range(i + 1, num_nodes):
                 if random.random() < self.connectivity_prob:
-                    A[i, j] = 1
-                    A[j, i] = 1
+                    A[i, j] = 1.0
+                    A[j, i] = 1.0
 
-        source = torch.rand(2) * self.max_distance
+        source = np.random.rand(2) * self.max_distance
 
-        num_nodes = positions.shape[0]
-        distances = torch.zeros(num_nodes, num_nodes)
-
+        # pairwise distances (with tiny eps on diagonal)
+        eps = 1e-6
+        distances = np.zeros((num_nodes, num_nodes), dtype=np.float32)
         for i in range(num_nodes):
             for j in range(num_nodes):
                 if i == j:
-                    distances[i, j] = 1e-6
+                    distances[i, j] = eps
                     continue
-
                 dx = positions[i, 0] - positions[j, 0]
                 dy = positions[i, 1] - positions[j, 1]
-                distances[i, j] = torch.sqrt(dx * dx + dy * dy) + 1e-6
+                distances[i, j] = np.sqrt(dx * dx + dy * dy) + eps
 
-        source_distances = torch.zeros(num_nodes)
-
+        # distances from source to each node
+        source_distances = np.zeros(num_nodes, dtype=np.float32)
         for i in range(num_nodes):
             dx = positions[i, 0] - source[0]
             dy = positions[i, 1] - source[1]
-            source_distances[i] = torch.sqrt(dx * dx + dy * dy) + 1e-6
+            source_distances[i] = np.sqrt(dx * dx + dy * dy) + eps
 
-
+        # signal + noise
         signal = 1.0 / source_distances
-        signal += torch.randn_like(signal) * self.std
+        signal = signal + np.random.randn(*signal.shape).astype(np.float32) * self.std
 
-        signal = (signal - signal.min()) / (signal.max() - signal.min() + 1e-6)
+        # normalize to [0, 1]
+        signal_min = float(signal.min())
+        signal_max = float(signal.max())
+        signal = (signal - signal_min) / (signal_max - signal_min + eps)
 
-        # for i in range(num_nodes):
-        #     print(f"Čvor {i}: Signal = {signal[i]:.4f}, Pozicija = ({positions[i,0]:.2f}, {positions[i,1]:.2f})")
-
-        x = signal.unsqueeze(-1)
+        x = signal[:, None].astype(np.float32)  # shape (num_nodes, 1)
 
         if self.label_type == "node":
-            relative_positions = torch.zeros(num_nodes, 2)
+            # relative vector from node to source: (source - position)
+            relative_positions = np.zeros((num_nodes, 2), dtype=np.float32)
             for i in range(num_nodes):
-                relative_positions[i] = source - positions[i]
+                relative_positions[i] = (source - positions[i]).astype(np.float32)
             y = relative_positions
 
         elif self.label_type == "graph":
-            y = torch.tensor(source)
+            y = source.astype(np.float32)
         else:
             raise ValueError("Nepoznat tip oznake")
-        
+
         nodes = {}
         nodes_letters = {}
 
@@ -142,34 +90,31 @@ class SignalGraphDataset():
                 if A[i, j] > 0:
                     neighbors.append(str(j))
                     n_letters.append(labels[j])
-            nodes_letters[labels[i]] = {"neighbours": n_letters, "value": float(x[i].item())}
-            nodes[str(i)] = {"neighbours": neighbors, "value": float(x[i].item())}
+
+            nodes_letters[labels[i]] = {
+                "neighbours": n_letters,
+                "value": float(x[i, 0]),
+            }
+            nodes[str(i)] = {
+                "neighbours": neighbors,
+                "value": float(x[i, 0]),
+            }
 
         return {
-            "x": x,                    # signal po čvoru
-            "A": A,                    # matrica povezanosti
-            "adj": distances,          # udaljenosti / povezanost
-            "y": y,                    # label (izvor signala) / pozicija, relativna ili apsolutna
-            "source": source,          # pozicija izvora signala
+            "x": x,                      # signal per node (num_nodes, 1)
+            "A": A,                      # connectivity matrix (num_nodes, num_nodes)
+            "adj": distances,            # distances matrix (num_nodes, num_nodes)
+            "y": y,                      # label (relative positions) or source position
+            "source": source.astype(np.float32),
             "num_nodes": num_nodes,
-            "positions": positions,    # pozicije čvorova
-            "nodes": nodes,            # čvorovi u formatu za config.json
-            "nodes_letters": nodes_letters # čvorovi s oznakama A, B, C... za lakše praćenje
+            "positions": positions.astype(np.float32),
+            "nodes": nodes,
+            "nodes_letters": nodes_letters,
         }
-    
+
+
 if __name__ == "__main__":
     dataset = SignalGraphDataset(label_type="graph")
     G = dataset.getGraph()
     print(G["nodes_letters"])
-
-    # batch = next(iter(loader))
-    # print(G["x"].shape)
-    # print(G["adj"].shape)
-    # print(G["y"])
-
-    # print("Susjedi čvora 0:", dataset.get_neighbors(0, 0))
-
-    # print(G["nodes"])
-    # print(G["positions"])
-
-    visualize_graph(G)
+    # visualize_graph(G)
