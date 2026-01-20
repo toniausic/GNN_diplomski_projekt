@@ -8,6 +8,8 @@ from digi.xbee.devices import DigiMeshDevice
 from digi.xbee.models.address import XBee64BitAddress
 from digi.xbee.exception import TransmitException
 
+from dataset import SignalGraphDataset
+
 
 def load_config(path: str) -> Dict[str, Any]:
     with open(path, "r", encoding="utf-8") as f:
@@ -155,17 +157,26 @@ def main():
     ap.add_argument("--iters", type=int, default=30)
     ap.add_argument("--sigma", type=float, default=0.1)
     ap.add_argument("--timeout", type=float, default=2.0)
+    ap.add_argument("--from_config", type=bool, default=False)
     args = ap.parse_args()
 
-    cfg = load_config(args.config)
 
-    id_to_addr = cfg["id_to_addr"]
-    nodes = cfg["nodes"]
+    if args.from_config:
+        cfg = load_config(args.config)
 
-    if args.id not in nodes:
-        raise SystemExit(f"Node '{args.id}' not found in config")
+        id_to_addr = cfg["id_to_addr"]
+        nodes = cfg["nodes"]
 
-    node_config = nodes[args.id]
+        if args.id not in nodes:
+            raise SystemExit(f"Node '{args.id}' not found in config")
+
+        node_config = nodes[args.id]
+    else:
+        dataset = SignalGraphDataset(num_samples=1, label_type="graph")
+        G = dataset.getGraph()
+
+        node_config = G["nodes_letters"][args.id]
+    
 
     node = ConsensusNode(
         node_id=args.id,

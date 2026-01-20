@@ -4,12 +4,14 @@ import random
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 
+import matplotlib.pyplot as plt
+
 def visualize_graph(sample):
     x = sample["x"].squeeze(-1)
-    positions = sample["positions"][0]
-    source = sample["source"][0]
+    positions = sample["positions"]
+    source = sample["source"]
     num_nodes = sample["num_nodes"]
-    A = sample["A"][0]
+    A = sample["A"]
 
     print("sorse:", source)
 
@@ -29,8 +31,20 @@ def visualize_graph(sample):
     plt.scatter(
         positions[:, 0],
         positions[:, 1],
-        s= 300 * x + 40,
+        s=300 * x + 40,
     )
+
+    # oznake čvorova ako ih je točno 5
+    if num_nodes == 5:
+        labels = ["A", "B", "C", "D", "E"]
+        for i, label in enumerate(labels):
+            plt.text(
+                positions[i, 0] + 0.02,  # mali pomak udesno
+                positions[i, 1] + 0.02,  # mali pomak gore
+                label,
+                fontsize=12,
+                fontweight="bold",
+            )
 
     # izvor signala
     plt.scatter(
@@ -45,31 +59,24 @@ def visualize_graph(sample):
     plt.ylabel("y")
     plt.show()
 
-
-class SignalGraphDataset(Dataset):
+class SignalGraphDataset():
     def __init__(
         self,
-        num_samples=1000,
-        min_nodes=4,
-        max_nodes=8,
+        node_size=5,
         std=0.01,
         max_distance=10.0,
         connectivity_prob=0.4,
         label_type="node"
     ):
-        self.num_samples = num_samples
-        self.min_nodes = min_nodes
-        self.max_nodes = max_nodes
+        self.node_size = node_size
         self.std = std
         self.max_distance = max_distance
         self.connectivity_prob = connectivity_prob
         self.label_type = label_type
 
-    def __len__(self):
-        return self.num_samples
 
-    def __getitem__(self, idx):
-        num_nodes = random.randint(self.min_nodes, self.max_nodes)
+    def getGraph(self):
+        num_nodes = random.randint(self.node_size, self.node_size)
         positions = torch.rand(num_nodes, 2) * self.max_distance
 
         A = torch.zeros(num_nodes, num_nodes)
@@ -122,6 +129,21 @@ class SignalGraphDataset(Dataset):
             y = torch.tensor(source)
         else:
             raise ValueError("Nepoznat tip oznake")
+        
+        nodes = {}
+        nodes_letters = {}
+
+        labels = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
+
+        for i in range(num_nodes):
+            neighbors = []
+            n_letters = []
+            for j in range(num_nodes):
+                if A[i, j] > 0:
+                    neighbors.append(str(j))
+                    n_letters.append(labels[j])
+            nodes_letters[labels[i]] = {"neighbours": n_letters, "value": float(x[i].item())}
+            nodes[str(i)] = {"neighbours": neighbors, "value": float(x[i].item())}
 
         return {
             "x": x,                    # signal po čvoru
@@ -131,24 +153,23 @@ class SignalGraphDataset(Dataset):
             "source": source,          # pozicija izvora signala
             "num_nodes": num_nodes,
             "positions": positions,    # pozicije čvorova
+            "nodes": nodes,            # čvorovi u formatu za config.json
+            "nodes_letters": nodes_letters # čvorovi s oznakama A, B, C... za lakše praćenje
         }
     
-    def get_neighbors(self, idx, vtx):
-        sample = self[idx]
-        A = sample["A"]
-        neighbors = torch.where(A[vtx] > 0)[0]
-        return neighbors.tolist()
+if __name__ == "__main__":
+    dataset = SignalGraphDataset(label_type="graph")
+    G = dataset.getGraph()
+    print(G["nodes_letters"])
 
-dataset = SignalGraphDataset(num_samples=1, label_type="graph")
-loader = DataLoader(dataset, batch_size=1, shuffle=True)
+    # batch = next(iter(loader))
+    # print(G["x"].shape)
+    # print(G["adj"].shape)
+    # print(G["y"])
 
-batch = next(iter(loader))
-print(batch["x"].shape)
-print(batch["adj"].shape)
-print(batch["y"])
+    # print("Susjedi čvora 0:", dataset.get_neighbors(0, 0))
 
-# print("Susjedi čvora 0:", dataset.get_neighbors(0, 0))
+    # print(G["nodes"])
+    # print(G["positions"])
 
-
-sample = dataset[0]
-visualize_graph(batch)
+    visualize_graph(G)
