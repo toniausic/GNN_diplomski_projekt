@@ -23,7 +23,7 @@ class ConsensusNode:
         id_to_addr: Dict[str, str],
         neighbors: List[str],
         value0: float,
-        sigma: float,  # mali korak u updateu
+        sigma: float, 
         num_iterations: int,
         wait_timeout_s: float,
     ):
@@ -42,9 +42,6 @@ class ConsensusNode:
         self.device = DigiMeshDevice(self.port, self.baud)
 
         self.received_values: Dict[int, Dict[str, float]] = {}
-
-        # Lock koristimo jer RX callback radi u drugoj niti i upisuje u received_values
-        #koristimo sleep(0.1) kao u pseudokodu s teamsa)
         self._lock = threading.Lock()
 
     def start(self):
@@ -134,21 +131,19 @@ class ConsensusNode:
                 time.sleep(0.1)
 
             #konsenzus algoritam iz pseudokoda
-            with self._lock:
-                got = dict(self.received_values.get(k, {}))
-
-            #TODO: Ako je broj manji od broja susjeda nista samo print, inace radi
-            if len(got) == 0: 
-                print(f"[{self.node_id}] k={k} recv=0/{len(self.neighbors)} value={self.value:.6f}")
+          # TODO: Ako je broj manji od broja susjeda nista samo print, inace radi
+            if len(got) < len(self.neighbors):
+                print(f"[{self.node_id}] k={k} recv={len(got)}/{len(self.neighbors)} value={self.value:.6f}")
             else:
                 suma = 0.0
                 for n in self.neighbors:
+                # svi susjedi su tu, ali ostavljamo sigurnosnu provjeru
                     if n in got:
                         suma += (got[n] - self.value)
+
                 self.value = self.value + self.sigma * suma
                 print(f"[{self.node_id}] k={k} recv={len(got)}/{len(self.neighbors)} value={self.value:.6f}")
 
-        print(f"[{self.node_id}] DONE final_value={self.value:.6f}")
 
 
 def main():
