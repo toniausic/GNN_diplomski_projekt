@@ -160,11 +160,10 @@ def main():
     ap.add_argument("--from_config", type=bool, default=False)
     args = ap.parse_args()
 
+    cfg = load_config(args.config)
+    id_to_addr = cfg["id_to_addr"]
 
     if args.from_config:
-        cfg = load_config(args.config)
-
-        id_to_addr = cfg["id_to_addr"]
         nodes = cfg["nodes"]
 
         if args.id not in nodes:
@@ -172,7 +171,7 @@ def main():
 
         node_config = nodes[args.id]
     else:
-        dataset = SignalGraphDataset(num_samples=1, label_type="graph")
+        dataset = SignalGraphDataset(label_type="graph")
         G = dataset.getGraph()
 
         node_config = G["nodes_letters"][args.id]
