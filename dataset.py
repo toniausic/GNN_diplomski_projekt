@@ -1,6 +1,6 @@
 import random
 import numpy as np
-from util import visualize_graph
+# from util import visualize_graph
 
 class SignalGraphDataset:
     def __init__(
@@ -126,4 +126,9 @@ if __name__ == "__main__":
     dataset = SignalGraphDataset(label_type="graph")
     G = dataset.getGraph()
     print(G["nodes_letters"])
-    visualize_graph(G)
+    # visualize_graph(G)
+
+
+    # for label in G["nodes_letters"]:
+    #     print(label + " " + str(G["nodes_letters"][label]["neighbours"]))
+    
