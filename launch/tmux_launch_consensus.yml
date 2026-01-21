@@ -85,4 +85,5 @@ windows:
   - central:
       panes:
         - |-
+          cd ~/other_ws/GNN_diplomski_projekt
           python3 central_node.py
