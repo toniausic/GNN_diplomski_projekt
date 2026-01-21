@@ -25,9 +25,10 @@ class ConsensusNode:
         id_to_addr: Dict[str, str],
         neighbors: List[str],
         value0: float,
-        sigma: float, 
+        sigma: float,
         num_iterations: int,
         wait_timeout_s: float,
+        init_timeout_s: float = 60.0,
     ):
         self.node_id = node_id
         self.port = port
@@ -46,12 +47,22 @@ class ConsensusNode:
         self.received_values: Dict[int, Dict[str, float]] = {}
         self._lock = threading.Lock()
 
+        # init sinkronizacija
+        self._init_event = threading.Event()
+        self.init_timeout_s = float(init_timeout_s)
+
     def start(self):
         self.device.open()
         self.device.add_data_received_callback(self._on_rx)
 
         print(f"[{self.node_id}] Port: {self.port} @ {self.baud}")
         print(f"[{self.node_id}] Adresa: {self.device.get_64bit_addr()}")
+
+        # cekaj centralni node
+        print(f"[{self.node_id}] Waiting for INIT (neighbours + value0) from central...")
+        if not self._init_event.wait(timeout=self.init_timeout_s):
+            raise TimeoutError(f"[{self.node_id}] INIT not received within {self.init_timeout_s} seconds")
+
         print(f"[{self.node_id}] Susjedi ={self.neighbors} value ={self.value}")
 
     def stop(self):
@@ -87,9 +98,28 @@ class ConsensusNode:
         except Exception:
             return
 
-        # provjera je li dict i je li tip VAL, mozemo izbaciti ako imamo dataset kojem mozemo vjerovati
         if not isinstance(msg, dict):
             return
+
+        if msg.get("type") == "INIT":
+            dst = msg.get("dst")
+            if dst is not None and str(dst) != self.node_id:
+                return
+
+            neigh = msg.get("neighbours") or msg.get("neighbors")
+            val0 = msg.get("value0")
+
+            if not isinstance(neigh, list) or val0 is None:
+                return
+
+            with self._lock:
+                self.neighbors = [str(n) for n in neigh]
+                self.value = float(val0)
+                self.received_values.clear()
+
+            self._init_event.set()
+            return
+
         if msg.get("type") != "VAL":
             return
 
@@ -133,13 +163,11 @@ class ConsensusNode:
                 time.sleep(0.1)
 
             #konsenzus algoritam iz pseudokoda
-          # TODO: Ako je broj manji od broja susjeda nista samo print, inace radi
             if len(got) < len(self.neighbors):
                 print(f"[{self.node_id}] k={k} recv={len(got)}/{len(self.neighbors)} value={self.value:.6f}")
             else:
                 suma = 0.0
                 for n in self.neighbors:
-                # svi susjedi su tu, ali ostavljamo sigurnosnu provjeru
                     if n in got:
                         suma += (got[n] - self.value)
 
@@ -147,46 +175,32 @@ class ConsensusNode:
                 print(f"[{self.node_id}] k={k} recv={len(got)}/{len(self.neighbors)} value={self.value:.6f}")
 
 
-
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--port", default = "/dev/ttyUSB0"  )
+    ap.add_argument("--port", default="/dev/ttyUSB0")
     ap.add_argument("--baud", type=int, default=9600)
     ap.add_argument("--id", required=True)
-    ap.add_argument("--config", default = "config.json")
+    ap.add_argument("--config", default="config.json")
     ap.add_argument("--iters", type=int, default=30)
     ap.add_argument("--sigma", type=float, default=0.1)
     ap.add_argument("--timeout", type=float, default=2.0)
-    ap.add_argument("--from_config", type=bool, default=False)
+    ap.add_argument("--init_timeout", type=float, default=60.0)
     args = ap.parse_args()
 
     cfg = load_config(args.config)
     id_to_addr = cfg["id_to_addr"]
-
-    if args.from_config:
-        nodes = cfg["nodes"]
-
-        if args.id not in nodes:
-            raise SystemExit(f"Node '{args.id}' not found in config")
-
-        node_config = nodes[args.id]
-    else:
-        dataset = SignalGraphDataset(label_type="graph")
-        G = dataset.getGraph()
-
-        node_config = G["nodes_letters"][args.id]
-    
 
     node = ConsensusNode(
         node_id=args.id,
         port=args.port,
         baud=args.baud,
         id_to_addr=id_to_addr,
-        neighbors=node_config["neighbours"],
-        value0=node_config["value"], # treba promijeniti
+        neighbors=[],
+        value0=0.0,
         sigma=args.sigma,
         num_iterations=args.iters,
         wait_timeout_s=args.timeout,
+        init_timeout_s=args.init_timeout,
     )
 
     node.start()
