@@ -1,5 +1,6 @@
 import random
 import numpy as np
+from util import visualize_graph
 
 class SignalGraphDataset:
     def __init__(
@@ -81,24 +82,32 @@ class SignalGraphDataset:
         nodes = {}
         nodes_letters = {}
 
-        labels = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
+        labels = ["A", "B", "C", "D", "E"]
+
+        for label in labels:
+            nodes_letters[label] = {"neighbours":[]}
 
         for i in range(num_nodes):
             neighbors = []
-            n_letters = []
+            # n_letters = []
             for j in range(num_nodes):
                 if A[i, j] > 0:
                     neighbors.append(str(j))
-                    n_letters.append(labels[j])
+                    # n_letters.append(labels[j])
+                    nodes_letters[labels[i]]["neighbours"].append(labels[j])
+                    nodes_letters[labels[j]]["neighbours"].append(labels[i])
 
-            nodes_letters[labels[i]] = {
-                "neighbours": n_letters,
-                "value": float(x[i, 0]),
-            }
+            
+            nodes_letters[labels[i]]["value"] = float(x[i, 0])
+            
             nodes[str(i)] = {
                 "neighbours": neighbors,
                 "value": float(x[i, 0]),
             }
+
+        for label in labels:
+            nodes_letters[label]["neighbours"] = list(set(nodes_letters[label]["neighbours"]))
+
 
         return {
             "x": x,                      # signal per node (num_nodes, 1)
@@ -117,4 +126,4 @@ if __name__ == "__main__":
     dataset = SignalGraphDataset(label_type="graph")
     G = dataset.getGraph()
     print(G["nodes_letters"])
-    # visualize_graph(G)
+    visualize_graph(G)
