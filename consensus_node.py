@@ -102,7 +102,7 @@ class ConsensusNode:
         if not isinstance(msg, dict):
             return
 
-        if msg.get("type") == "INIT":
+        if msg.get("t") == True:
             neigh = msg.get("n")
             val0 = msg.get("v")
 

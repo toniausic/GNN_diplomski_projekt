@@ -66,6 +66,7 @@ def main():
         value0 = node_info.get("value")
 
         init_msg = {
+            "t": True,
             "n": list(neighbors),
             "v": float(value0),
         }
@@ -78,7 +79,7 @@ def main():
             try:
                 device.send_data_64(addr, data)
                 ok = True
-                print(f"[CENTRAL] INIT -> {node_id} (attempt {attempt}) neighbours={neighbors} value0={value0}")
+                print(f"[CENTRAL] INIT -> {node_id}, MAC -> {addr} (attempt {attempt}) neighbours={neighbors} value0={value0}")
                 break
             except TransmitException as e:
                 status = getattr(e, "transmit_status", None) or getattr(e, "status", None)
