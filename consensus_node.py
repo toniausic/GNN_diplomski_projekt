@@ -175,7 +175,7 @@ def main():
     ap.add_argument("--baud", type=int, default=9600)
     ap.add_argument("--id", required=True)
     ap.add_argument("--config", default="config.json")
-    ap.add_argument("--iters", type=int, default=30)
+    ap.add_argument("--iters", type=int, default=60)
     ap.add_argument("--sigma", type=float, default=0.1)
     ap.add_argument("--timeout", type=float, default=2.0)
     ap.add_argument("--init_timeout", type=float, default=60.0)
