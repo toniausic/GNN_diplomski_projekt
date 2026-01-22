@@ -66,6 +66,7 @@ def main():
     print(f"[CENTRAL] Addr: {device.get_64bit_addr()}")
     print(f"[CENTRAL] Sending INIT to: {sorted(nodes_cfg.keys())}")
 
+    print(nodes_cfg)
 
     for node_id, node_info in nodes_cfg.items():
         if node_id not in id_to_addr:
