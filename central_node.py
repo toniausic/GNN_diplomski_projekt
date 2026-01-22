@@ -73,6 +73,8 @@ def main():
             print(f"[CENTRAL] WARN: node '{node_id}' missing from id_to_addr, skipping")
             continue
 
+        print(node_id)
+
         neighbors = node_info.get("neighbours")
         value0 = node_info.get("value")
 
