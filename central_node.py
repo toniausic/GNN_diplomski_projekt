@@ -27,7 +27,7 @@ def main():
     ap.add_argument("--retry_delay", type=float, default=0.4)
     args = ap.parse_args()
 
-    time.sleep(7)
+    time.sleep(10)
 
     cfg = load_config(args.config)
 
@@ -52,7 +52,14 @@ def main():
             if nid:
                 acks.add(str(nid))
 
-    device.open()
+    for i in range(5):
+        try:
+            device.open()
+            break
+        except:
+            print("Device couldn't open, trying again...")
+
+
     device.add_data_received_callback(on_rx)
 
     print(f"[CENTRAL] Port: {args.port} @ {args.baud}")
