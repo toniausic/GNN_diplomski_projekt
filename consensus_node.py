@@ -79,7 +79,7 @@ class ConsensusNode:
             "value": value,
         }
 
-        print(f"Sent message to {neighbor_id}")
+        # print(f"Sent message to {neighbor_id}")
 
         data = json.dumps(msg).encode("utf-8")
         addr = XBee64BitAddress.from_hex_string(self.id_to_addr[neighbor_id])
