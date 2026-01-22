@@ -27,7 +27,7 @@ def main():
     ap.add_argument("--retry_delay", type=float, default=0.4)
     args = ap.parse_args()
 
-    time.sleep(12)
+    time.sleep(14)
 
     cfg = load_config(args.config)
 
@@ -77,11 +77,11 @@ def main():
 
         init_msg = {
             "t": True,
+            "d":node_id,
             "n": list(neighbors),
-            "v": float(value0),
         }
         data = json.dumps(init_msg).encode("utf-8")
-        print("SIZEOF INIT PAYLOAD: ", sys.getsizeof(data), len(data))
+        print("SIZEOF INIT PAYLOAD 1: ", sys.getsizeof(data), len(data))
         addr = XBee64BitAddress.from_hex_string(id_to_addr[node_id])
 
         ok = False
@@ -98,6 +98,8 @@ def main():
 
         if not ok:
             print(f"[CENTRAL] ERROR: Could not deliver INIT to {node_id}")
+
+
 
         time.sleep(0.1)
 

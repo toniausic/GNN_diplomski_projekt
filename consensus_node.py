@@ -104,9 +104,10 @@ class ConsensusNode:
 
         if msg.get("t") == True:
             neigh = msg.get("n")
-            val0 = msg.get("v")
+            # val0 = msg.get("v")
+            val0 = 1
 
-            print(f"N: {neigh}, V: {val0}")
+            print(f"N: {neigh}, Dst: {val0}")
 
             with self._lock:
                 self.neighbors = [str(n) for n in neigh]
