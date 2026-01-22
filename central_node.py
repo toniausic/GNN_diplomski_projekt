@@ -27,7 +27,7 @@ def main():
     ap.add_argument("--retry_delay", type=float, default=0.4)
     args = ap.parse_args()
 
-    time.sleep(10)
+    time.sleep(12)
 
     cfg = load_config(args.config)
 
