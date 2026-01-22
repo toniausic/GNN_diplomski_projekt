@@ -102,15 +102,8 @@ class ConsensusNode:
             return
 
         if msg.get("type") == "INIT":
-            dst = msg.get("dst")
-            if dst is not None and str(dst) != self.node_id:
-                return
-
-            neigh = msg.get("neighbours") or msg.get("neighbors")
-            val0 = msg.get("value0")
-
-            if not isinstance(neigh, list) or val0 is None:
-                return
+            neigh = msg.get("n")
+            val0 = msg.get("v")
 
             with self._lock:
                 self.neighbors = [str(n) for n in neigh]

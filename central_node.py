@@ -21,10 +21,8 @@ def main():
     ap.add_argument("--port", default="/dev/ttyUSB0")
     ap.add_argument("--baud", type=int, default=9600)
     ap.add_argument("--config", default="config.json")
-    ap.add_argument("--retries", type=int, default=5)
+    ap.add_argument("--retries", type=int, default=10)
     ap.add_argument("--retry_delay", type=float, default=0.4)
-    ap.add_argument("--wait_acks", action="store_true", help="Wait for ACK_INIT from all nodes")
-    ap.add_argument("--ack_timeout", type=float, default=5.0)
     args = ap.parse_args()
 
     cfg = load_config(args.config)
@@ -62,16 +60,12 @@ def main():
             print(f"[CENTRAL] WARN: node '{node_id}' missing from id_to_addr, skipping")
             continue
 
-        neighbors = node_info.get("neighbours") or node_info.get("neighbors") or []
+        neighbors = node_info.get("neighbours")
         value0 = node_info.get("value")
-        if value0 is None:
-            raise SystemExit(f"[CENTRAL] Node '{node_id}' missing 'value' in config")
 
         init_msg = {
-            "type": "INIT",
-            "dst": node_id,
-            "neighbours": list(neighbors),
-            "value0": float(value0),
+            "n": list(neighbors),
+            "v": float(value0),
         }
         data = json.dumps(init_msg).encode("utf-8")
         print("SIZEOF INIT PAYLOAD: ", sys.getsizeof(data), len(data))
@@ -94,22 +88,21 @@ def main():
 
         time.sleep(0.1)
 
-    if args.wait_acks:
-        expected = {nid for nid in nodes_cfg.keys() if nid in id_to_addr}
-        t0 = time.time()
-        while time.time() - t0 < args.ack_timeout:
-            if expected.issubset(acks):
-                break
-            time.sleep(0.1)
-
-        missing = sorted(expected - acks)
-        if missing:
-            print(f"[CENTRAL] ACK timeout. Missing ACK_INIT from: {missing}")
-        else:
-            print("[CENTRAL] All ACK_INIT received.")
-
     device.close()
 
+def test():
+    dataset = SignalGraphDataset()
+    G = dataset.getGraph()
+    nodes_cfg = G["nodes_letters"]
+
+    init_msg = {
+        "n": ["D","B", "E","C"],
+        "v": float(0.854857),
+    }
+    data = json.dumps(init_msg).encode("utf-8")
+
+    print("SIZEOF INIT PAYLOAD: ", sys.getsizeof(data), len(data))
 
 if __name__ == "__main__":
     main()
+
