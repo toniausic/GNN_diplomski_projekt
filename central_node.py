@@ -1,6 +1,7 @@
 import argparse
 import json
 import time
+import sys
 from typing import Dict, Any
 from dataset import SignalGraphDataset
 
@@ -73,6 +74,7 @@ def main():
             "value0": float(value0),
         }
         data = json.dumps(init_msg).encode("utf-8")
+        print("SIZEOF INIT PAYLOAD: ", sys.getsizeof(data), len(data))
         addr = XBee64BitAddress.from_hex_string(id_to_addr[node_id])
 
         ok = False
