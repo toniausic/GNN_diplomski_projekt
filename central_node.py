@@ -69,11 +69,11 @@ def main():
     print(nodes_cfg)
 
     nodes_cfg = {
-        "A": {"neighbours": ["A"], "value":1},
-    "B": {"neighbours": ["B"], "value":2},
-    "C": {"neighbours": ["C"], "value":3},
-    "D": {"neighbours": ["D"], "value":4},
-    "E": {"neighbours": ["E"], "value":5}
+        "A": {"neighbours": ["B"], "value":1},
+    "B": {"neighbours": ["C"], "value":2},
+    "C": {"neighbours": ["D"], "value":3},
+    "D": {"neighbours": ["E"], "value":4},
+    "E": {"neighbours": ["A"], "value":5}
     }
 
     for node_id, node_info in nodes_cfg.items():
@@ -82,13 +82,12 @@ def main():
             continue
 
         print(node_id)
-
         neighbors = node_info.get("neighbours")
         value0 = node_info.get("value")
 
         init_msg = {
             "t": True,
-            "d":node_id,
+            "d": node_id,
             "n": list(neighbors),
         }
         data = json.dumps(init_msg).encode("utf-8")
