@@ -8,8 +8,6 @@ from digi.xbee.devices import DigiMeshDevice
 from digi.xbee.models.address import XBee64BitAddress
 from digi.xbee.exception import TransmitException
 
-from dataset import SignalGraphDataset
-import matplotlib.pyplot as plt
 
 def load_config(path: str) -> Dict[str, Any]:
     with open(path, "r", encoding="utf-8") as f:
@@ -80,6 +78,8 @@ class ConsensusNode:
             "src": self.node_id,
             "value": value,
         }
+
+        print(f"Sent message to {self.node_id}")
 
         data = json.dumps(msg).encode("utf-8")
         addr = XBee64BitAddress.from_hex_string(self.id_to_addr[neighbor_id])
