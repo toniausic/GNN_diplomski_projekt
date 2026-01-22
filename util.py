@@ -53,3 +53,8 @@ def visualize_graph(sample):
     plt.xlabel("x")
     plt.ylabel("y")
     plt.draw()
+
+
+def load_config(path: str) -> Dict[str, Any]:
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)

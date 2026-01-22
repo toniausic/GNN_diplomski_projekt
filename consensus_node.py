@@ -96,7 +96,6 @@ class ConsensusNode:
         try:
             msg = json.loads(xbee_message.data.decode("utf-8"))
         except Exception:
-            print("Failed")
             return
 
         if not isinstance(msg, dict):
