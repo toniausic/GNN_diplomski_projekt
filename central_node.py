@@ -37,6 +37,7 @@ def main():
     dataset = SignalGraphDataset()
     G = dataset.getGraph()
     nodes_cfg = G["nodes_letters"]
+    visualize_graph(G)
 
     device = DigiMeshDevice(args.port, args.baud)
     acks = set()
