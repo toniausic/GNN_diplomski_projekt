@@ -68,14 +68,6 @@ def main():
 
     print(nodes_cfg)
 
-    nodes_cfg = {
-        "A": {"neighbours": ["B"], "value":1},
-    "B": {"neighbours": ["C"], "value":2},
-    "C": {"neighbours": ["D"], "value":3},
-    "D": {"neighbours": ["E"], "value":4},
-    "E": {"neighbours": ["A"], "value":5}
-    }
-
     for node_id, node_info in nodes_cfg.items():
         if node_id not in id_to_addr:
             print(f"[CENTRAL] WARN: node '{node_id}' missing from id_to_addr, skipping")
@@ -87,11 +79,9 @@ def main():
 
         init_msg = {
             "t": True,
-            "d": node_id,
             "n": list(neighbors),
         }
         data = json.dumps(init_msg).encode("utf-8")
-        print("SIZEOF INIT PAYLOAD 1: ", sys.getsizeof(data), len(data))
         addr = XBee64BitAddress.from_hex_string(id_to_addr[node_id])
 
         ok = False
@@ -108,8 +98,6 @@ def main():
 
         if not ok:
             print(f"[CENTRAL] ERROR: Could not deliver INIT to {node_id}")
-
-
 
         time.sleep(0.1)
 
