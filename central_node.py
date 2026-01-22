@@ -68,6 +68,14 @@ def main():
 
     print(nodes_cfg)
 
+    nodes_cfg = {
+        "A": {"neighbours": ["A"], "value":1},
+    "B": {"neighbours": ["B"], "value":2},
+    "C": {"neighbours": ["C"], "value":3},
+    "D": {"neighbours": ["D"], "value":4},
+    "E": {"neighbours": ["E"], "value":5}
+    }
+
     for node_id, node_info in nodes_cfg.items():
         if node_id not in id_to_addr:
             print(f"[CENTRAL] WARN: node '{node_id}' missing from id_to_addr, skipping")
