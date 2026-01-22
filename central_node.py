@@ -25,6 +25,8 @@ def main():
     ap.add_argument("--retry_delay", type=float, default=0.4)
     args = ap.parse_args()
 
+    time.sleep(5)
+
     cfg = load_config(args.config)
 
     id_to_addr = cfg["id_to_addr"]
