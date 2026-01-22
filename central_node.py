@@ -4,6 +4,8 @@ import time
 import sys
 from typing import Dict, Any
 from dataset import SignalGraphDataset
+from util import visualize_graph
+import matplotlib.pyplot as plt
 
 from digi.xbee.devices import DigiMeshDevice
 from digi.xbee.models.address import XBee64BitAddress
@@ -92,6 +94,7 @@ def main():
         time.sleep(0.1)
 
     device.close()
+    plt.show()
 
 def test():
     dataset = SignalGraphDataset()

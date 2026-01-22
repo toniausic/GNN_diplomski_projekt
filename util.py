@@ -39,4 +39,4 @@ def visualize_graph(sample):
     plt.title("Vizualizacija grafa (velicina = jacina signala)")
     plt.xlabel("x")
     plt.ylabel("y")
-    plt.show()
+    plt.draw()
