@@ -6,6 +6,7 @@ from typing import Dict, Any
 from dataset import SignalGraphDataset
 from util import visualize_graph
 import matplotlib.pyplot as plt
+import socket
 
 from digi.xbee.devices import DigiMeshDevice
 from digi.xbee.models.address import XBee64BitAddress
@@ -106,18 +107,20 @@ def main():
     plt.show()
 
 def test():
-    dataset = SignalGraphDataset()
-    G = dataset.getGraph()
-    nodes_cfg = G["nodes_letters"]
+    # dataset = SignalGraphDataset()
+    # G = dataset.getGraph()
+    # nodes_cfg = G["nodes_letters"]
 
-    init_msg = {
-        "n": ["D","B", "E","C"],
-        "v": float(0.854857),
-    }
-    data = json.dumps(init_msg).encode("utf-8")
+    # init_msg = {
+    #     "n": ["D","B", "E","C"],
+    #     "v": float(0.854857),
+    # }
+    # data = json.dumps(init_msg).encode("utf-8")
 
-    print("SIZEOF INIT PAYLOAD: ", sys.getsizeof(data), len(data))
+    # print("SIZEOF INIT PAYLOAD: ", sys.getsizeof(data), len(data))
+
+    print(socket.gethostname())
 
 if __name__ == "__main__":
-    main()
+    test()
 
