@@ -79,7 +79,7 @@ class ConsensusNode:
             "value": value,
         }
 
-        print(f"Sent message to {self.node_id}")
+        print(f"Sent message to {neighbor_id}")
 
         data = json.dumps(msg).encode("utf-8")
         addr = XBee64BitAddress.from_hex_string(self.id_to_addr[neighbor_id])
@@ -105,6 +105,8 @@ class ConsensusNode:
         if msg.get("t") == True:
             neigh = msg.get("n")
             val0 = msg.get("v")
+
+            print(f"N: {neigh}, V: {val0}")
 
             with self._lock:
                 self.neighbors = [str(n) for n in neigh]
