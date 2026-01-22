@@ -7,8 +7,6 @@ def visualize_graph(sample):
     num_nodes = sample["num_nodes"]
     A = sample["A"]                      # shape: (num_nodes, num_nodes)
 
-    print("source:", source)
-
     plt.figure()
 
     # bridovi
@@ -35,6 +33,21 @@ def visualize_graph(sample):
         marker="x",
         s=300,
     )
+
+        # oznake čvorova (A–E) ako graf ima 5 čvorova
+    if num_nodes == 5:
+        labels = ["A", "B", "C", "D", "E"]
+        for i, label in enumerate(labels):
+            plt.text(
+                positions[i, 0],
+                positions[i, 1],
+                label,
+                fontsize=12,
+                fontweight="bold",
+                ha="center",
+                va="center",
+            )
+
 
     plt.title("Vizualizacija grafa (velicina = jacina signala)")
     plt.xlabel("x")

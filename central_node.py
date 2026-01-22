@@ -80,6 +80,7 @@ def main():
         init_msg = {
             "t": True,
             "n": list(neighbors),
+            "v": value0
         }
         data = json.dumps(init_msg).encode("utf-8")
         addr = XBee64BitAddress.from_hex_string(id_to_addr[node_id])
