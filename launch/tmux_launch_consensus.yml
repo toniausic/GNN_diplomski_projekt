@@ -57,33 +57,33 @@ windows:
           ssh -o StrictHostKeyChecking=no -t pi@rpi0.local 'docker start -i xbee_gnn_cont'
           <%- end %>
           cd ~/other_ws/GNN_diplomski_projekt
-          python3 consensus_node.py --id "A"
+          python3 consensus_node_zigbee.py --id "A"
         - |
           <%- if args[0] == "remote" %>
           ssh -o StrictHostKeyChecking=no -t pi@rpi1.local 'docker start -i xbee_gnn_cont'
           <%- end %>
           cd ~/other_ws/GNN_diplomski_projekt
-          python3 consensus_node.py --id "B"
+          python3 consensus_node_zigbee.py --id "B"
         - |
           <%- if args[0] == "remote" %>
           ssh -o StrictHostKeyChecking=no -t pi@rpi2.local 'docker start -i xbee_gnn_cont'
           <%- end %>
           cd ~/other_ws/GNN_diplomski_projekt
-          python3 consensus_node.py --id "C"
+          python3 consensus_node_zigbee.py --id "C"
         - |
           <%- if args[0] == "remote" %>
           ssh -o StrictHostKeyChecking=no -t pi@rpi3.local 'docker start -i xbee_gnn_cont'
           <%- end %>
           cd ~/other_ws/GNN_diplomski_projekt
-          python3 consensus_node.py --id "D"
+          python3 consensus_node_zigbee.py --id "D"
         - |
           <%- if args[0] == "remote" %>
           ssh -o StrictHostKeyChecking=no -t pi@rpi4.local 'docker start -i xbee_gnn_cont'
           <%- end %>
           cd ~/other_ws/GNN_diplomski_projekt
-          python3 consensus_node.py --id "E"
+          python3 consensus_node_zigbee.py --id "E"
   - central:
       panes:
         - |-
           cd ~/other_ws/GNN_diplomski_projekt
-          python3 central_node.py
+          python3 central_node_zigbee.py
