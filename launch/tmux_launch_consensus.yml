@@ -1,7 +1,7 @@
 # ./.tmuxinator.yml
 
 name: xbee
-root: ~/other_ws/xbee_dec_gnn
+root: ~/other_ws/GNN_diplomski_projekt
 
 # Optional tmux socket
 # socket_name: foo

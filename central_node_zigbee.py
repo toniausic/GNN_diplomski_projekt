@@ -28,8 +28,6 @@ def main():
     ap.add_argument("--retry_delay", type=float, default=0.4)
     args = ap.parse_args()
 
-    time.sleep(10)
-
     cfg = load_config(args.config)
 
     id_to_addr = cfg["id_to_addr"]
@@ -60,12 +58,17 @@ def main():
             break
         except:
             print("Device couldn't open, trying again...")
+            time.sleep(0.5)
 
 
     device.add_data_received_callback(on_rx)
 
     print(f"[CENTRAL] Port: {args.port} @ {args.baud}")
     print(f"[CENTRAL] Addr: {device.get_64bit_addr()}")
+
+    t = 10
+    print(f"Waiting {t} seconds for others to start...")
+    time.sleep(t)
 
     # >>> CHANGED: show max RF payload (NP) as reported by firmware.
     try:
