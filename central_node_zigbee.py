@@ -66,7 +66,7 @@ def main():
     print(f"[CENTRAL] Port: {args.port} @ {args.baud}")
     print(f"[CENTRAL] Addr: {device.get_64bit_addr()}")
 
-    t = 10
+    t = 15
     print(f"Waiting {t} seconds for others to start...")
     time.sleep(t)
 
